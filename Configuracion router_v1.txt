@@ -1,0 +1,4 @@
+CONFIG DEL ROUTER PREVIO A QOS
+
+
+show run 
