@@ -1,6 +1,252 @@
-CONFIG DEL ROUTER PREVIO A QOS
+R1#sh run
+Building configuration...
 
+Current configuration : 4467 bytes
+!
+upgrade fpd auto
+version 12.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname R1
+!
+boot-start-marker
+boot-end-marker
+!
+logging message-counter syslog
+!
+no aaa new-model
+ip source-route
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+ip dhcp excluded-address 192.168.20.1 192.168.20.10
+ip dhcp excluded-address 192.168.30.1 192.168.30.10
+ip dhcp excluded-address 192.168.40.1 192.168.40.10
+!
+ip dhcp pool VLAN20_DOCENTES
+   network 192.168.20.0 255.255.255.0
+   default-router 192.168.20.1
+   dns-server 8.8.8.8
+!
+ip dhcp pool VLAN30_ESTUDIANTES
+   network 192.168.30.0 255.255.255.0
+   default-router 192.168.30.1
+   dns-server 8.8.8.8
+!
+ip dhcp pool VLAN40_CAMARAS
+   network 192.168.40.0 255.255.255.0
+   default-router 192.168.40.1
+!
+!
+no ip domain lookup
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+archive
+ log config
+  hidekeys
+!
+!
+!
+!
+!
+ip tcp synwait-time 5
+!
+class-map match-any CLASS_VLAN40
+ match ip precedence 5
+class-map match-any CLASS_VLAN10
+ match ip precedence 1
+class-map match-any CLASS_VLAN20
+ match ip precedence 2
+class-map match-any CLASS_VLAN30
+ match ip precedence 3
+class-map match-all IN_VLAN40
+ match access-group 140
+class-map match-all IN_VLAN10
+ match access-group 110
+class-map match-all IN_VLAN30
+ match access-group 130
+class-map match-all IN_VLAN20
+ match access-group 120
+!
+!
+policy-map MARCAR_ENTRADA
+ class IN_VLAN10
+  set ip precedence 1
+ class IN_VLAN20
+  set ip precedence 2
+ class IN_VLAN30
+  set ip precedence 3
+ class IN_VLAN40
+  set ip precedence 5
+policy-map QOS_FINAL
+ class CLASS_VLAN40
+    priority percent 30
+ class CLASS_VLAN10
+    shape average 10000000
+ class CLASS_VLAN20
+    bandwidth percent 20
+ class CLASS_VLAN30
+    shape average 2000000
+    bandwidth percent 10
+ class class-default
+    fair-queue
+!
+!
+!
+!
+!
+interface FastEthernet0/0
+ description WAN_HACIA_R2
+ ip address 192.168.1.1 255.255.255.0
+ ip nat outside
+ ip virtual-reassembly
+ duplex full
+ service-policy output QOS_FINAL
+!
+interface FastEthernet1/0
+ description LAN
+ no ip address
+ ip virtual-reassembly
+ duplex full
+ speed 100
+!
+interface FastEthernet1/0.10
+ description ADMINISTRACION
+ encapsulation dot1Q 10
+ ip address 10.10.10.1 255.255.255.0
+ ip nat inside
+ ip virtual-reassembly
+ service-policy input MARCAR_ENTRADA
+!
+interface FastEthernet1/0.20
+ description DOCENTES
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.0
+ ip nat inside
+ ip virtual-reassembly
+ service-policy input MARCAR_ENTRADA
+!
+interface FastEthernet1/0.30
+ description ESTUDIANTES
+ encapsulation dot1Q 30
+ ip address 192.168.30.1 255.255.255.0
+ ip nat inside
+ ip virtual-reassembly
+ service-policy input MARCAR_ENTRADA
+!
+interface FastEthernet1/0.40
+ description CAMARAS-NVR
+ encapsulation dot1Q 40
+ ip address 192.168.40.1 255.255.255.0
+ ip access-group AISLAMIENTO_CAMARAS in
+ ip nat inside
+ ip virtual-reassembly
+ service-policy input MARCAR_ENTRADA
+!
+interface FastEthernet1/1
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface FastEthernet2/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface FastEthernet2/1
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface FastEthernet3/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface FastEthernet3/1
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+ip forward-protocol nd
+ip route 0.0.0.0 0.0.0.0 192.168.1.254
+no ip http server
+no ip http secure-server
+!
+!
+ip nat inside source list 1 interface FastEthernet0/0 overload
+!
+ip access-list extended AISLAMIENTO_CAMARAS
+ deny   ip 192.168.40.0 0.0.0.255 10.10.10.0 0.0.0.255
+ deny   ip 192.168.40.0 0.0.0.255 192.168.20.0 0.0.0.255
+ deny   ip 192.168.40.0 0.0.0.255 192.168.30.0 0.0.0.255
+ permit ip 192.168.40.0 0.0.0.255 any
+!
+access-list 1 permit 10.10.10.0 0.0.0.255
+access-list 1 permit 192.168.20.0 0.0.0.255
+access-list 1 permit 192.168.30.0 0.0.0.255
+access-list 1 permit 192.168.40.0 0.0.0.255
+access-list 110 permit ip 10.10.10.0 0.0.0.255 any
+access-list 120 permit ip 192.168.20.0 0.0.0.255 any
+access-list 130 permit ip 192.168.30.0 0.0.0.255 any
+access-list 140 permit ip 192.168.40.0 0.0.0.255 any
+no cdp log mismatch duplex
+!
+!
+!
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+gatekeeper
+ shutdown
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+!
+end
 
-show run 
-
-AGREGUE QOS
+R1#
