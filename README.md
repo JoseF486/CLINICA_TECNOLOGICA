@@ -23,7 +23,7 @@ documenta las configuraciones resultantes del rediseño, orientado a tres pilare
 | `/switches/` | Configuración de VLANs y etiquetado 802.1Q |
 | `/Routers/` | Configuración de Routers |
 | `/zabbix/` | Plantillas SNMP y configuración de alertas |
-| `/docs/topologia.png` | Diagrama de topología lógica posterior a la implementación |
+| `/diagrama de red.png` | Diagrama de topología lógica posterior a la implementación |
 
 ## Arquitectura de red
 
