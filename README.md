@@ -20,8 +20,8 @@ documenta las configuraciones resultantes del rediseño, orientado a tres pilare
 |---|---|
 | `/freeradius/clients.conf` | Definición de clientes RADIUS (NAS) autorizados |
 | `/freeradius/users` | Usuarios de prueba para autenticación WPA2-Enterprise |
-| `/switches/cisco-2960/` | Configuración de VLANs y etiquetado 802.1Q |
-| `/switches/meraki/` | Configuración de switches core Meraki MS220 |
+| `/switches/` | Configuración de VLANs y etiquetado 802.1Q |
+| `/Routers/` | Configuración de Routers |
 | `/zabbix/` | Plantillas SNMP y configuración de alertas |
 | `/docs/topologia.png` | Diagrama de topología lógica posterior a la implementación |
 
